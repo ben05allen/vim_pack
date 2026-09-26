@@ -16,10 +16,6 @@
       "rev": "8d5d0c5aa92449368ac251e85451d79d8f69d296",
       "src": "https://github.com/echasnovski/mini.surround"
     },
-    "nvim-lint": {
-      "rev": "3d55c8f67c6ae5c15e1042571e107c7a3d5c5f4e",
-      "src": "https://github.com/mfussenegger/nvim-lint"
-    },
     "nvim-lspconfig": {
       "rev": "ffd261c09c3dabd0bf1a438f47a8ae3b22f3c3ff",
       "src": "https://github.com/neovim/nvim-lspconfig"
