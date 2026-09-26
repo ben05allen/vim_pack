@@ -24,12 +24,46 @@ require('mini.basics').setup()
 require('mini.completion').setup()
 require('mini.comment').setup()
 require('mini.files').setup()
+
 require('mini.icons').setup()
 require('mini.move').setup()
 require('mini.pick').setup()
 require('mini.splitjoin').setup()
 require('mini.surround').setup()
 require('mini.tabline').setup()
+
+-- Grab paths
+local MiniFiles = require('mini.files')
+local minifiles_group = vim.api.nvim_create_augroup('MiniFilesPathGrab', {})
+vim.api.nvim_create_autocmd('User', {
+  group = minifiles_group,
+  pattern = 'MiniFilesBufferCreate',
+  callback = function(args)
+    local buf_id = args.data.buf_id
+
+    local grab_path = function(relative)
+      local entry = MiniFiles.get_fs_entry()
+      if not entry then
+        return
+      end
+
+      local path = relative and vim.fn.fnamemodify(entry.path, ':.') or entry.path
+      vim.fn.setreg('+', path) -- system clipboard
+      vim.fn.setreg('"', path) -- unnamed register
+      vim.notify('Grabbed path: ' .. path)
+      MiniFiles.close()
+    end
+
+    -- grab the absolute path with gY
+    vim.keymap.set('n', 'gY', function()
+      grab_path(false)
+    end, { buffer = buf_id, desc = 'Grab absolute path' })
+    -- grab the relative path with gy
+    vim.keymap.set('n', 'gy', function()
+      grab_path(true)
+    end, { buffer = buf_id, desc = 'Grab path relative to cwd' })
+  end,
+})
 
 -- Line numbering
 vim.opt.number = true
