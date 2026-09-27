@@ -82,6 +82,8 @@ vim.api.nvim_create_autocmd('User', {
 vim.opt.relativenumber = true
 
 -- More Keymaps
+vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>', { silent = true })
+
 vim.keymap.set('n', '<leader>e', function()
   require('mini.files').open()
 end, { desc = 'Open mini.files' })
