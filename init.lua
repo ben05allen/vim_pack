@@ -140,32 +140,12 @@ vim.diagnostic.config({
   },
 })
 
--- Go
-vim.lsp.config['gopls'] = {
-  cmd = { 'gopls' },
-  filetypes = { 'go', 'gomod', 'gowork', 'gotmpl' },
-  root_markers = { 'go.work', 'go.mod', '.git' },
-  settings = {
-    gopls = {
-      gofumpt = true,
-      usePlaceholders = true,
-      completeUnimported = true,
-      staticcheck = true,
-      analyses = {
-        unusedparams = true,
-        shadow = true,
-      },
-      hints = {
-        assignVariableTypes = true,
-        compositeLiteralFields = true,
-        constantValues = true,
-        parameterNames = true,
-        rangeVariableTypes = true,
-      },
-    },
-  },
-}
-vim.lsp.enable('gopls')
+-- LSP
+-- Per-server deltas live in after/lsp/*.lua, which :h lsp-config-merge gives
+-- higher precedence than the lsp/*.lua files shipped by nvim-lspconfig. That
+-- plugin supplies cmd/filetypes/root_markers for every server named below, so
+-- anything not listed in after/lsp/ is deliberately inherited rather than set.
+vim.lsp.enable({ 'gopls', 'lua_ls', 'ruff', 'ty', 'rust_analyzer' })
 
 -- allow gopls inlay hints
 vim.api.nvim_create_autocmd('LspAttach', {
@@ -176,76 +156,6 @@ vim.api.nvim_create_autocmd('LspAttach', {
     end
   end,
 })
-
--- Lua
-vim.lsp.config['lua_ls'] = {
-  -- manually override cache folder to user-owned
-  cmd = {
-    'lua-language-server',
-    '--logpath=' .. vim.fn.stdpath('cache') .. '/lua-language-server/log',
-    '--metapath=' .. vim.fn.stdpath('cache') .. '/lua-language-server/meta',
-  },
-  filetypes = { 'lua' },
-  root_markers = { '.luarc.json', '.luarc.jsonc', '.git' },
-  settings = {
-    Lua = {
-      runtime = { version = 'LuaJIT' },
-      diagnostics = {
-        globals = { 'vim' }, -- Stop "Undefined global 'vim'" warnings
-      },
-      workspace = {
-        library = {
-          vim.env.VIMRUNTIME, -- Neovim runtime APIs
-          vim.fn.stdpath('config'), -- This config
-          vim.fn.stdpath('data') .. '/site/pack/core/opt/mini.nvim/lua', -- Mini* globals
-        },
-        checkThirdParty = false,
-      },
-      telemetry = { enable = false },
-      format = { enable = false },
-    },
-  },
-}
-vim.lsp.enable('lua_ls')
-
--- Python
-vim.lsp.config['ruff'] = {
-  cmd = { 'ruff', 'server' },
-  filetypes = { 'python' },
-  root_markers = { 'pyproject.toml', '.git' },
-}
-vim.lsp.enable('ruff')
-
-vim.lsp.config['ty'] = {
-  cmd = { 'ty', 'server' },
-  filetypes = { 'python' },
-  root_markers = { 'pyproject.toml', '.git' },
-}
-vim.lsp.enable('ty')
-
---Rust
-vim.lsp.config['rust_analyzer'] = {
-  cmd = { 'rust-analyzer' },
-  filetypes = { 'rust' },
-  root_markers = { 'Cargo.toml', 'rust-project.json', '.git' },
-  settings = {
-    ['rust-analyzer'] = {
-      checkOnSave = true,
-      check = {
-        command = 'clippy',
-      },
-      inlayHints = {
-        bindingModeHints = { enable = true },
-        closureCaptureHints = { enable = true },
-        typeHints = { enable = true },
-      },
-      cargo = {
-        allFeatures = true,
-      },
-    },
-  },
-}
-vim.lsp.enable('rust_analyzer')
 
 -- Rainbow_csv
 require('rainbow_csv').setup()
