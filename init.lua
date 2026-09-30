@@ -17,10 +17,11 @@ vim.keymap.set({ 'i', 'v' }, 'jj', '<Esc>', { noremap = true })
 -- packages
 vim.pack.add({
   'https://github.com/cameron-wags/rainbow_csv.nvim',
-  'https://github.com/nvim-mini/mini.nvim',
   'https://github.com/neovim/nvim-lspconfig',
+  'https://github.com/nvim-mini/mini.nvim',
   'https://github.com/nvim-treesitter/nvim-treesitter',
   'https://github.com/stevearc/conform.nvim',
+  'https://github.com/linux-cultist/venv-selector.nvim',
 })
 
 require('mini.basics').setup()
@@ -264,84 +265,11 @@ require('conform').setup({
   },
 })
 
--- Python venv Selector
-local function select_venv()
-  -- Ancestor walk: check every directory from cwd to / for an existing
-  -- .venv/venv dir (cheap isdirectory checks, so no fd hang risk here).
-  -- This catches uv workspaces where the venv lives at the repo root.
-  local venv_dirs, seen = {}, {}
-  local dir = vim.fs.normalize(vim.fn.getcwd())
-  while dir and dir ~= '/' do
-    for _, name in ipairs({ '.venv', 'venv' }) do
-      local candidate = dir .. '/' .. name
-      if vim.fn.isdirectory(candidate) == 1 and not seen[candidate] then
-        seen[candidate] = true
-        table.insert(venv_dirs, candidate)
-      end
-    end
-    dir = vim.fs.dirname(dir)
-  end
+require('venv-selector').setup({
+  options = {
+    picker = 'mini-pick',
+    notify_user_on_venv_activation = true, -- confirm the activation landed
+  },
+})
 
-  -- Resolve fd binary (Ubuntu/Debian ship it as `fdfind`)
-  local fd_bin = vim.fn.executable('fd') == 1 and 'fd' or 'fdfind'
-
-  -- fd scan of ~/.virtualenvs (the only place whose layout we can't guess);
-  -- wrapped in `timeout` since the child process can hang on e.g. NFS mounts
-  local home_venvs = vim.fn.expand('~/.virtualenvs')
-  if fd_bin and vim.fn.executable(fd_bin) == 1 and vim.fn.isdirectory(home_venvs) == 1 then
-    local ok, output = pcall(
-      vim.fn.system,
-      { 'timeout', '10s', fd_bin, '--max-depth', '4', 'python$', '--full-path', home_venvs }
-    )
-    if ok and vim.v.shell_error == 0 and output ~= '' then
-      for _, python_path in ipairs(vim.split(vim.trim(output), '\n')) do
-        local venv_path = python_path:match('(.*)/bin/python') or python_path:match('(.*)/Scripts/python.exe')
-        if venv_path and not seen[venv_path] then
-          seen[venv_path] = true
-          table.insert(venv_dirs, venv_path)
-        end
-      end
-    end
-  end
-
-  if #venv_dirs == 0 then
-    vim.notify('No Python virtualenv directories found', vim.log.levels.WARN)
-    return
-  end
-
-  MiniPick.start({
-    source = {
-      name = 'Python VirtualEnvs',
-      items = venv_dirs,
-      choose = function(item)
-        if not item or item == '' then
-          return
-        end
-
-        -- Set VIRTUAL_ENV environment variable; item is already the venv dir
-        vim.env.VIRTUAL_ENV = item
-
-        -- Restart Python LSP clients so they pick up the new environment:
-        -- ty reads VIRTUAL_ENV (and .venv) at spawn, ruff discovers its env fresh
-        -- too; live settings notifications with `pythonPath` are ignored by both.
-        for _, client in ipairs(vim.lsp.get_clients({ bufnr = 0 })) do
-          if vim.list_contains({ 'ty', 'ruff' }, client.name) then
-            client:stop()
-          end
-        end
-        -- Re-fire FileType on every Python buffer so vim.lsp.enable's
-        -- autocmd re-attaches the stopped clients (also handles buffers
-        -- that aren't the current one)
-        for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
-          if vim.bo[bufnr].filetype == 'python' then
-            vim.api.nvim_exec_autocmds('FileType', { buffer = bufnr })
-          end
-        end
-
-        vim.notify('Switched Python venv to: ' .. item, vim.log.levels.INFO)
-      end,
-    },
-  })
-end
-
-vim.keymap.set('n', '<leader>cv', select_venv, { desc = 'Select Python venv' })
+vim.keymap.set('n', '<leader>cv', '<cmd>VenvSelect<cr>', { desc = 'Select Python venv' })

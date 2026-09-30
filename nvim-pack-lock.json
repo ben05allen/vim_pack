@@ -27,6 +27,10 @@
     "rainbow_csv.nvim": {
       "rev": "26de78d8324f7ac6a3e478319d1eb1f17123eb5b",
       "src": "https://github.com/cameron-wags/rainbow_csv.nvim"
+    },
+    "venv-selector.nvim": {
+      "rev": "cc4bb3975de8835291f9bb45889e96c6b2795fc4",
+      "src": "https://github.com/linux-cultist/venv-selector.nvim"
     }
   }
 }
