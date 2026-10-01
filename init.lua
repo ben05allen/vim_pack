@@ -62,9 +62,6 @@ vim.api.nvim_create_autocmd('User', {
       end
 
       local path = relative and vim.fn.fnamemodify(entry.path, ':.') or entry.path
-      -- unnamedplus makes `p` read the '+' register, so writing that is
-      -- enough. A setreg('"') alongside it is not observable: `p` ignores it
-      -- and an explicit `"p` pastes nothing regardless.
       vim.fn.setreg('+', path)
       vim.notify('Grabbed path: ' .. path)
       MiniFiles.close()
@@ -101,14 +98,6 @@ vim.keymap.set({ 'n', 'v' }, '<leader>cf', function()
 end, { desc = 'Format buffer' })
 
 -- Clipboard
--- No g:clipboard config needed: Neovim auto-detects win32yank.exe on WSL and
--- handles CRLF/LF itself (see runtime/autoload/provider/clipboard.vim). Adding
--- a hand-rolled provider here previously ran into two traps:
---   1. provider commands given as a *string* go through /bin/sh -c, where WSL
---      interop and PowerShell quoting mangle quotes and backslashes.
---   2. .NET regex *replacement* strings don't expand \n, so the usual
---      -replace "\r\n", "\n" emitted a literal `\n` instead of a newline.
--- The built-in provider passes commands as a list, so neither applies.
 vim.opt.clipboard = 'unnamedplus'
 
 -- Diagnostics
@@ -135,10 +124,6 @@ vim.diagnostic.config({
 })
 
 -- LSP
--- Per-server deltas live in after/lsp/*.lua, which :h lsp-config-merge gives
--- higher precedence than the lsp/*.lua files shipped by nvim-lspconfig. That
--- plugin supplies cmd/filetypes/root_markers for every server named below, so
--- anything not listed in after/lsp/ is deliberately inherited rather than set.
 vim.lsp.enable({ 'gopls', 'lua_ls', 'ruff', 'ty', 'rust_analyzer' })
 
 -- allow gopls inlay hints
