@@ -62,8 +62,10 @@ vim.api.nvim_create_autocmd('User', {
       end
 
       local path = relative and vim.fn.fnamemodify(entry.path, ':.') or entry.path
-      vim.fn.setreg('+', path) -- system clipboard
-      vim.fn.setreg('"', path) -- unnamed register
+      -- unnamedplus makes `p` read the '+' register, so writing that is
+      -- enough. A setreg('"') alongside it is not observable: `p` ignores it
+      -- and an explicit `"p` pastes nothing regardless.
+      vim.fn.setreg('+', path)
       vim.notify('Grabbed path: ' .. path)
       MiniFiles.close()
     end
