@@ -99,22 +99,14 @@ vim.keymap.set({ 'n', 'v' }, '<leader>cf', function()
 end, { desc = 'Format buffer' })
 
 -- Clipboard
-if vim.fn.has('wsl') == 1 then
-  vim.g.clipboard = {
-    name = 'wsl_clipboard',
-    copy = {
-      ['+'] = 'clip.exe',
-      ['*'] = 'clip.exe',
-    },
-    paste = {
-      ['+'] = [[powershell.exe -NoProfile -Command "[Console]::Out.Write((Get-Clipboard -Raw) -replace \"\r\n\", \"\n\")"]],
-      ['*'] = [[powershell.exe -NoProfile -Command "[Console]::Out.Write((Get-Clipboard -Raw) -replace \"\r\n\", \"\n\")"]],
-    },
-    cache_enabled = 0,
-  }
-end
-
--- Sync Neovim's default registers with the system clipboard
+-- No g:clipboard config needed: Neovim auto-detects win32yank.exe on WSL and
+-- handles CRLF/LF itself (see runtime/autoload/provider/clipboard.vim). Adding
+-- a hand-rolled provider here previously ran into two traps:
+--   1. provider commands given as a *string* go through /bin/sh -c, where WSL
+--      interop and PowerShell quoting mangle quotes and backslashes.
+--   2. .NET regex *replacement* strings don't expand \n, so the usual
+--      -replace "\r\n", "\n" emitted a literal `\n` instead of a newline.
+-- The built-in provider passes commands as a list, so neither applies.
 vim.opt.clipboard = 'unnamedplus'
 
 -- Diagnostics
