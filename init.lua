@@ -22,6 +22,7 @@ vim.pack.add({
   'https://github.com/nvim-treesitter/nvim-treesitter',
   'https://github.com/stevearc/conform.nvim',
   'https://github.com/linux-cultist/venv-selector.nvim',
+  'https://github.com/folke/tokyonight.nvim',
 })
 
 require('mini.basics').setup()
@@ -39,13 +40,14 @@ require('mini.splitjoin').setup()
 require('mini.statusline').setup()
 require('mini.surround').setup()
 require('mini.tabline').setup()
+require('tokyonight').setup()
 require('mini.trailspace').setup()
 
 local MiniFiles = require('mini.files')
 local MiniPick = require('mini.pick')
 
 -- Theme
-vim.cmd.colorscheme('miniwinter')
+vim.cmd.colorscheme('tokyonight')
 
 -- Grab paths
 local minifiles_group = vim.api.nvim_create_augroup('MiniFilesPathGrab', {})
