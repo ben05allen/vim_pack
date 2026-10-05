@@ -98,6 +98,22 @@ vim.keymap.set({ 'n', 'v' }, '<leader>cf', function()
 end, { desc = 'Format buffer' })
 
 -- Clipboard
+local function paste()
+  return { vim.fn.split(vim.fn.getreg(''), '\n'), vim.fn.getregtype('') }
+end
+
+vim.g.clipboard = {
+  name = 'OSC 52',
+  copy = {
+    ['+'] = require('vim.ui.clipboard.osc52').copy('+'),
+    ['*'] = require('vim.ui.clipboard.osc52').copy('*'),
+  },
+  paste = {
+    ['+'] = paste,
+    ['*'] = paste,
+  },
+}
+
 vim.opt.clipboard = 'unnamedplus'
 
 -- Diagnostics
