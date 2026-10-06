@@ -40,8 +40,8 @@ require('mini.splitjoin').setup()
 require('mini.statusline').setup()
 require('mini.surround').setup()
 require('mini.tabline').setup()
-require('tokyonight').setup()
 require('mini.trailspace').setup()
+require('tokyonight').setup()
 
 local MiniFiles = require('mini.files')
 local MiniPick = require('mini.pick')
@@ -142,7 +142,7 @@ vim.diagnostic.config({
 })
 
 -- LSP
-vim.lsp.enable({ 'gopls', 'lua_ls', 'ruff', 'ty', 'rust_analyzer' })
+vim.lsp.enable({ 'gopls', 'lua_ls', 'ruff', 'ty', 'rust_analyzer', 'html' })
 
 -- allow gopls inlay hints
 vim.api.nvim_create_autocmd('LspAttach', {
@@ -160,7 +160,9 @@ require('rainbow_csv').setup()
 -- Formatting
 require('conform').setup({
   formatters_by_ft = {
+    astro = { 'prettier' },
     go = { 'goimports', 'gofumpt' },
+    html = { 'prettier' },
     python = { 'ruff_organize_imports', 'ruff_format' },
     rust = { 'rustfmt' },
     lua = { 'stylua' },
