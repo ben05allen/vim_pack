@@ -29,7 +29,12 @@ require('mini.basics').setup()
 require('mini.completion').setup()
 require('mini.comment').setup()
 require('mini.diff').setup()
-require('mini.files').setup()
+require('mini.files').setup({
+  windows = {
+    preview = true,
+    width_preview = 32,
+  },
+})
 require('mini.icons').setup()
 require('mini.indentscope').setup()
 require('mini.move').setup()
